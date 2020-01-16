@@ -154,7 +154,7 @@ class FbfFloodData():
             SELECT
                 *
             FROM
-                flood_event fe
+                hazard_event fe
             WHERE
                 fe.id = {flood_event_id}
         """.format(
