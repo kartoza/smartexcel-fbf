@@ -3,10 +3,12 @@ from collections import namedtuple
 import shutil
 import requests
 import psycopg2
+
 try:
     import plpy
 except:
     pass
+
 
 def namedtuplefetchall(cursor):
     "Return all rows from a cursor as a namedtuple"
@@ -30,11 +32,11 @@ class FbfFloodData():
             self.pl_python_env = pl_python_env
         else:
             self.connection = psycopg2.connect(
-                user = os.environ['DB_USER'],
-                password = os.environ['DB_PASSWORD'],
-                host = os.environ['DB_HOST'],
-                port = os.environ['DB_PORT'],
-                database = os.environ['DB_DATABASE'])
+                user=os.environ['DB_USER'],
+                password=os.environ['DB_PASSWORD'],
+                host=os.environ['DB_HOST'],
+                port=os.environ['DB_PORT'],
+                database=os.environ['DB_DATABASE'])
             self.pl_python_env = False
 
         self.results = {
@@ -77,7 +79,7 @@ class FbfFloodData():
                 summary.trigger_status as activation_state
 
             FROM
-                flood_event fe,
+                hazard_event fe,
                 mv_flood_event_district_summary summary,
                 district area
             WHERE
@@ -91,7 +93,6 @@ class FbfFloodData():
 
         return self.execute_query(query)
 
-
     def get_subdistricts(self, flood_event_id, district_code):
 
         query = """
@@ -104,7 +105,7 @@ class FbfFloodData():
                 summary.trigger_status as activation_state
 
             FROM
-                flood_event fe,
+                hazard_event fe,
                 mv_flood_event_sub_district_summary summary,
                 sub_district area
             WHERE
@@ -120,7 +121,6 @@ class FbfFloodData():
 
         return self.execute_query(query)
 
-
     def get_villages(self, flood_event_id, sub_district_code):
         query = """
             SELECT
@@ -132,7 +132,7 @@ class FbfFloodData():
                 summary.trigger_status as activation_state
 
             FROM
-                flood_event fe,
+                hazard_event fe,
                 mv_flood_event_village_summary summary,
                 village area
             WHERE
@@ -147,7 +147,6 @@ class FbfFloodData():
         )
 
         return self.execute_query(query)
-
 
     def get_flood(self, flood_event_id):
         query = """
@@ -166,7 +165,7 @@ class FbfFloodData():
     def get_flood_extent(self, flood_event_id):
         query = """
             SELECT *
-            FROM vw_flood_event_extent fee
+            FROM vw_hazard_event_extent fee
             WHERE fee.id = {flood_event_id}
         """.format(
             flood_event_id=flood_event_id
@@ -432,7 +431,8 @@ def build_wms_url(flood_event_id, bbox, size):
     cql_filter = f'flood_event_id={flood_event_id}'
     image_format = 'image/png8'
 
-    return f'http://78.47.62.69/geoserver/kartoza/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT={image_format}&TRANSPARENT=true&LAYERS={layer}&cql_filter={cql_filter}&exceptions=application/vnd.ogc.se_inimage&SRS=EPSG:4326&STYLES=&WIDTH={width}&HEIGHT={height}&BBOX={bbox}'
+    return f'http://staging.fbf.kartoza.com/geoserver/kartoza/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT={image_format}&TRANSPARENT=true&LAYERS={layer}&cql_filter={cql_filter}&exceptions=application/vnd.ogc.se_inimage&SRS=EPSG:4326&STYLES=&WIDTH={width}&HEIGHT={height}&BBOX={bbox}'
+
 
 def extent_to_string(extent):
     return ','.join([
@@ -441,6 +441,7 @@ def extent_to_string(extent):
         str(extent.x_max),
         str(extent.y_max)
     ])
+
 
 def download_map(url, image):
     maps_dir = '/tmp/fba-maps'
@@ -458,6 +459,7 @@ def download_map(url, image):
         shutil.copyfileobj(response.raw, out_file)
 
     return path
+
 
 def path_to_image(image):
     return os.path.join(
