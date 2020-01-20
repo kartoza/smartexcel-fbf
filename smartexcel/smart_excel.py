@@ -140,9 +140,12 @@ class SmartExcel():
         for sheet_key, sheet_data in self.sheets.items():
             if not sheet_data['reserved']:
                 try:
-                    sheet_data['fd'] = self.workbook.add_worksheet(sheet_data['name'])
+                    name = sheet_data['name']
+                    if len(name) > 31:
+                        name = name[:31]
+                    sheet_data['fd'] = self.workbook.add_worksheet(name)
                 except xlsxwriter.exceptions.DuplicateWorksheetName:
-                    sheet_data['fd'] = self.workbook.add_worksheet(f"{sheet_data['name']}-1")
+                    pass
 
         # Then, we create the reserved sheets
         for sheet_key, sheet_data in self.sheets.items():
@@ -161,7 +164,10 @@ class SmartExcel():
             if sheet_data['reserved']:
                 continue
 
-            fd_current_sheet = sheet_data['fd']
+            try:
+                fd_current_sheet = sheet_data['fd']
+            except KeyError:
+                continue
 
             self.apply_settings(fd_current_sheet, sheet_data['settings'])
 
