@@ -2,7 +2,7 @@ import copy
 import xlsxwriter
 from openpyxl import load_workbook
 import math
-
+import re
 
 SMART_EXCEL_CONFIG = {
     'sheet_names': ['Sheet1', '_data', '_meta'],
@@ -33,7 +33,7 @@ class SmartExcel():
     WRITEMODE = False
 
     def __init__(
-        self,
+            self,
             definition=None,
             data=None,
             path=None,
@@ -70,7 +70,6 @@ class SmartExcel():
             self.WRITEMODE = True
             self.init_write_mode(definition, output)
 
-
     def init_read_mode(self, definition, path):
         """
         Init in READMODE.
@@ -99,7 +98,6 @@ class SmartExcel():
         self.add_reserved_sheets()
 
         self.parse_definition(definition)
-
 
     def parse(self):
         """
@@ -141,9 +139,19 @@ class SmartExcel():
             if not sheet_data['reserved']:
                 try:
                     name = sheet_data['name']
+                    if not re.match(r'^[a-zA-Z_\\][a-zA-Z_.]+', name):
+                        print("Invalid Excel characters in defined_name(): '%s'" % name)
+                        return -1
+                    if re.match(r'^[a-zA-Z][a-zA-Z]?[a-dA-D]?[0-9]+$', name):
+                        print("Name looks like a cell name in defined_name(): '%s'" % name)
+                        return -1
                     if len(name) > 31:
+                        raise Exception(" Excel worksheet name '%s' must be <= 31 chars." %name)
                         name = name[:31]
                     sheet_data['fd'] = self.workbook.add_worksheet(name)
+                    for sheets in sheet_data['fd']:
+                        if name.lower() == sheets.name.lower():
+                            raise Exception("Sheet name '%s', with case ignored, is already in use." % name)
                 except xlsxwriter.exceptions.DuplicateWorksheetName:
                     pass
 
@@ -193,7 +201,6 @@ class SmartExcel():
                 self.data,
                 f"apply_setting_{func_setting}"
             )(fd_current_sheet)
-
 
     def render_map_component(self, fd_current_sheet, component, next_available_row):
         """Render a Map component into the current sheet at the next available row.
@@ -356,7 +363,6 @@ class SmartExcel():
             image_heigt_in_cells = math.ceil(component['size']['height'] / height_cell_px)
             return image_heigt_in_cells + self.margin_component
 
-
     def add_reserved_sheets(self):
         """SmartExcel automatically adds two spreadsheets:
         - _data: to store drop-down list values
@@ -510,7 +516,7 @@ class SmartExcel():
             sheet_name = getattr(
                 self.data,
                 f"get_sheet_name_for_{parent_comp['recursive']['name']['func']}"
-                )(instance)
+            )(instance)
 
             definition = {
                 'name': sheet_name,
@@ -684,7 +690,6 @@ class SmartExcel():
             'format': table_format
         })
 
-
     def parse_text(self, **kwargs):
         """Parse a Text component.
         Attributes:
@@ -796,7 +801,6 @@ class SmartExcel():
             'position': position
         })
 
-
     def parse_columns(self, columns, repeat):
         """Parse columns of a Table component.
 
@@ -849,7 +853,6 @@ class SmartExcel():
 
                 parsed_columns.append(tmp_col)
             return parsed_columns
-
 
     def set_list_source_func(self, sheet, cell_range, column):
         if 'validations' in column and 'list_source_func' in column['validations']:
@@ -905,14 +908,15 @@ class SmartExcel():
                             if 'validations' in column:
                                 tmp.update(column['validations'])
 
-                                if 'list_source_func' in column['validations']\
-                                    and column['data_func'] not in self.validations:
+                                if 'list_source_func' in column['validations'] \
+                                        and column['data_func'] not in self.validations:
                                     list_source = getattr(
                                         self.data,
                                         column['validations']['list_source_func'])()
 
                                     tmp.update({
-                                        'meta_source': f'={self.data_worksheet_name}!$A${tmp["row"]}:${next_letter(len(list_source) - 1)}${tmp["row"]}'  # noqa
+                                        'meta_source': f'={self.data_worksheet_name}!$A${tmp["row"]}:${next_letter(len(list_source) - 1)}${tmp["row"]}'
+                                        # noqa
                                     })
 
                                     self.sheets['_data']['fd'].write_row(
@@ -937,7 +941,6 @@ class SmartExcel():
         if 'format' in component and component['format']:
             if format_type in component['format']:
                 return self.get_format(component['format'][format_type])
-
 
     def build_top_header(self):
         if self.groups:
@@ -1028,9 +1031,9 @@ class SmartExcel():
         payload = getattr(
             self.data,
             func_name)(
-                instance=instance,
-                foreign_key=foreign_key
-            )
+            instance=instance,
+            foreign_key=foreign_key
+        )
         return payload
 
 
@@ -1071,7 +1074,6 @@ def check_meta_config(wb):
     }
 
 
-
 A, Z = 65, 90
 TOTAL = 26
 
@@ -1092,6 +1094,7 @@ def next_letter(length):
     else:
         char = length + A
     return chr(char)
+
 
 def validate_attrs(required_attrs, element, element_type):
     for attr in required_attrs:
