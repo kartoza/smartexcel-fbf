@@ -10,6 +10,7 @@ SMART_EXCEL_CONFIG = {
     'header_row_cell_position': 'B2'
 }
 
+version = 2
 
 class SmartExcel():
     """
