@@ -147,12 +147,8 @@ class SmartExcel():
                         print("Name looks like a cell name in defined_name(): '%s'" % name)
                         return -1
                     if len(name) > 31:
-                        raise Exception(" Excel worksheet name '%s' must be <= 31 chars." %name)
                         name = name[:31]
                     sheet_data['fd'] = self.workbook.add_worksheet(name)
-                    for sheets in sheet_data['fd']:
-                        if name.lower() == sheets.name.lower():
-                            raise Exception("Sheet name '%s', with case ignored, is already in use." % name)
                 except xlsxwriter.exceptions.DuplicateWorksheetName:
                     pass
 
