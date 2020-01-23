@@ -1,4 +1,4 @@
-xlsxwriter
-openpyxl
-psycopg2
-requests
+xlsxwriter>=1.2
+openpyxl>=3
+psycopg2>=2.8
+requests>=2.22

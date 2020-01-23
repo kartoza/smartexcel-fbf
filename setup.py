@@ -14,6 +14,12 @@ setuptools.setup(
     url="https://github.com/kartoza/smartexcel-fbf",
     packages=setuptools.find_packages(),
     include_package_data=True,
+    install_requires=[
+        'xlsxwriter>=1.2',
+        'openpyxl>=3',
+        'psycopg2>=2.8',
+        'requests>=2.22',
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
