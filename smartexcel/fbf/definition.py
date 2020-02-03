@@ -4,7 +4,8 @@ FBF_DEFINITION = [
         'key': 'table_header',
         'format': {
             'bold': True,
-            'font_size': 14,
+            'font_size': 12,
+            'text_wrap': True,
             'align': 'center',
             'valign': 'vcenter',
             'font_color': 'white',
@@ -85,7 +86,7 @@ FBF_DEFINITION = [
                 'type': 'text',
                 'name': 'Sheet Title',
                 'size': {
-                    'width': 4,
+                    'width': 7,
                     'height': 2
                 },
                 'text_func': 'main_sheet_title',
@@ -121,7 +122,7 @@ FBF_DEFINITION = [
                     'margin': {
                         'left': 1
                     },
-                    'middle': 1
+                    'middle': 2
                 },
                 'payload': 'flood',
                 'format': {
@@ -160,7 +161,7 @@ FBF_DEFINITION = [
                 'type': 'text',
                 'name': 'Overview Map',
                 'size': {
-                    'width': 4,
+                    'width': 7,
                     'height': 1
                 },
                 'text_func': 'main_sheet_sub_title',
@@ -180,33 +181,52 @@ FBF_DEFINITION = [
                 'type': 'table',
                 'payload': 'districts',
                 'format': {
-                    'header': 'table_header'
+                    'header': 'table_header',
+                    'header_height': 2
                 },
                 'columns': [
                     {
                         'name': 'District Name',
                         'data_func': 'district_name',
-                        'width': 20,
+                        'width': 21,
                         'format': 'bold'
                     },
                     {
                         'name': 'Total Buildings',
                         'data_func': 'total_buildings',
-                        'width': 20,
+                        'width': 12,
                         'format': 'number'
                     },
                     {
                         'name': 'Flooded Buildings',
                         'data_func': 'flooded_buildings',
-                        'width': 25,
+                        'width': 12,
                         'format': 'number'
                     },
                     {
                         'name': 'Not Flooded Buildings',
                         'data_func': 'not_flooded_buildings',
-                        'width': 30,
+                        'width': 12,
                         'format': 'number'
                     },
+                    {
+                        'name': 'Total Roads',
+                        'data_func': 'total_roads',
+                        'width': 12,
+                        'format': 'number'
+                    },
+                    {
+                        'name': 'Flooded Roads',
+                        'data_func': 'flooded_roads',
+                        'width': 12,
+                        'format': 'number'
+                    },
+                    {
+                        'name': 'Not Flooded Roads',
+                        'data_func': 'not_flooded_roads',
+                        'width': 12,
+                        'format': 'number'
+                    }
                 ],
                 'recursive': {
                     # create a sheet for each instance of payload
@@ -220,7 +240,7 @@ FBF_DEFINITION = [
                             'type': 'text',
                             'name': 'District Sheet Title',
                             'size': {
-                                'width': 4,
+                                'width': 7,
                                 'height': 2
                             },
                             'text_func': 'district_sheet_title',
@@ -242,28 +262,45 @@ FBF_DEFINITION = [
                                 {
                                     'name': 'Sub-district Name',
                                     'data_func': 'sub_district_name',
-                                    'width': 22,
+                                    'width': 21,
                                     'format': 'bold'
                                 },
                                 {
                                     'name': 'Total Buildings',
                                     'data_func': 'total_buildings',
-                                    'width': 20,
+                                    'width': 12,
                                     'format': 'number'
                                 },
                                 {
                                     'name': 'Flooded Buildings',
                                     'data_func': 'flooded_buildings',
-                                    'width': 25,
+                                    'width': 12,
                                     'format': 'number'
                                 },
                                 {
                                     'name': 'Not Flooded Buildings',
                                     'data_func': 'not_flooded_buildings',
-                                    'width': 30,
+                                    'width': 12,
                                     'format': 'number'
                                 },
-
+                                {
+                                    'name': 'Total Roads',
+                                    'data_func': 'total_roads',
+                                    'width': 12,
+                                    'format': 'number'
+                                },
+                                {
+                                    'name': 'Flooded Roads',
+                                    'data_func': 'flooded_roads',
+                                    'width': 12,
+                                    'format': 'number'
+                                },
+                                {
+                                    'name': 'Not Flooded Roads',
+                                    'data_func': 'not_flooded_roads',
+                                    'width': 12,
+                                    'format': 'number'
+                                }
                             ],
                             'recursive': {
                                 'name': {
@@ -276,7 +313,7 @@ FBF_DEFINITION = [
                                         'type': 'text',
                                         'name': 'Sub-district Sheet Title',
                                         'size': {
-                                            'width': 4,
+                                            'width': 7,
                                             'height': 2
                                         },
                                         'text_func': 'sub_district_sheet_title',
@@ -298,27 +335,45 @@ FBF_DEFINITION = [
                                             {
                                                 'name': 'Village Name',
                                                 'data_func': 'village_name',
-                                                'width': 20,
+                                                'width': 21,
                                                 'format': 'bold'
                                             },
                                             {
                                                 'name': 'Total Buildings',
                                                 'data_func': 'total_buildings',
-                                                'width': 20,
+                                                'width': 12,
                                                 'format': 'number'
                                             },
                                             {
                                                 'name': 'Flooded Buildings',
                                                 'data_func': 'flooded_buildings',
-                                                'width': 25,
+                                                'width': 12,
                                                 'format': 'number'
                                             },
                                             {
                                                 'name': 'Not Flooded Buildings',
                                                 'data_func': 'not_flooded_buildings',
-                                                'width': 30,
+                                                'width': 12,
                                                 'format': 'number'
                                             },
+                                            {
+                                                'name': 'Total Roads',
+                                                'data_func': 'total_roads',
+                                                'width': 12,
+                                                'format': 'number'
+                                            },
+                                            {
+                                                'name': 'Flooded Roads',
+                                                'data_func': 'flooded_roads',
+                                                'width': 12,
+                                                'format': 'number'
+                                            },
+                                            {
+                                                'name': 'Not Flooded Roads',
+                                                'data_func': 'not_flooded_roads',
+                                                'width': 12,
+                                                'format': 'number'
+                                            }
                                         ],
                                         'recursive': {
                                             'name': {
@@ -331,7 +386,7 @@ FBF_DEFINITION = [
                                                     'type': 'text',
                                                     'name': 'Village Sheet Title',
                                                     'size': {
-                                                        'width': 4,
+                                                        'width': 7,
                                                         'height': 2
                                                     },
                                                     'text_func': 'village_sheet_title',
@@ -353,27 +408,45 @@ FBF_DEFINITION = [
                                                         {
                                                             'name': 'Village Name',
                                                             'data_func': 'village_name',
-                                                            'width': 20,
+                                                            'width': 21,
                                                             'format': 'bold'
                                                         },
                                                         {
                                                             'name': 'Total Buildings',
                                                             'data_func': 'total_buildings',
                                                             'format': 'number',
-                                                            'width': 20,
+                                                            'width': 12,
                                                         },
                                                         {
                                                             'name': 'Flooded Buildings',
                                                             'data_func': 'flooded_buildings',
                                                             'format': 'number',
-                                                            'width': 25,
+                                                            'width': 12,
                                                         },
                                                         {
                                                             'name': 'Not Flooded Buildings',
                                                             'data_func': 'not_flooded_buildings',
                                                             'format': 'number',
-                                                            'width': 30,
+                                                            'width': 12,
                                                         },
+                                                        {
+                                                            'name': 'Total Roads',
+                                                            'data_func': 'total_roads',
+                                                            'width': 12,
+                                                            'format': 'number'
+                                                        },
+                                                        {
+                                                            'name': 'Flooded Roads',
+                                                            'data_func': 'flooded_roads',
+                                                            'width': 12,
+                                                            'format': 'number'
+                                                        },
+                                                        {
+                                                            'name': 'Not Flooded Roads',
+                                                            'data_func': 'not_flooded_roads',
+                                                            'width': 12,
+                                                            'format': 'number'
+                                                        }
                                                     ]
                                                 },
                                             ]

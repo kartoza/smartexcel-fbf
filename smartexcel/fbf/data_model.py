@@ -39,9 +39,11 @@ class FbfFloodData():
                 database=os.environ['DB_DATABASE'])
             self.pl_python_env = False
 
+        districts_summary = self.get_districts(flood_event_id)
+
         self.results = {
             'flood': self.get_flood(flood_event_id),
-            'districts': self.get_districts(flood_event_id),
+            'districts': districts_summary
         }
 
     def execute_query(self, query):
@@ -76,15 +78,20 @@ class FbfFloodData():
                 summary.total_vulnerability_score as vulnerability_total_score,
                 summary.building_count as total_buildings,
                 summary.flooded_building_count as flooded_buildings,
-                summary.trigger_status as activation_state
+                summary.trigger_status as activation_state,
+                road_summary.road_count as total_roads,
+                road_summary.flooded_flooded_road_count as flooded_roads
 
             FROM
                 hazard_event fe,
                 mv_flood_event_district_summary summary,
+                mv_flood_event_road_district_summary road_summary,
                 district area
             WHERE
                 fe.id = summary.flood_event_id
                 and summary.district_id = area.dc_code
+                and fe.id = road_summary.flood_event_id
+                and road_summary.district_id = area.dc_code
                 and fe.id = {flood_event_id}
             ;
         """.format(
@@ -102,15 +109,20 @@ class FbfFloodData():
                 summary.total_vulnerability_score as vulnerability_total_score,
                 summary.building_count as total_buildings,
                 summary.flooded_building_count as flooded_buildings,
-                summary.trigger_status as activation_state
+                summary.trigger_status as activation_state,
+                road_summary.road_count as total_roads,
+                road_summary.flooded_flooded_road_count as flooded_roads
 
             FROM
                 hazard_event fe,
                 mv_flood_event_sub_district_summary summary,
+                mv_flood_event_road_sub_district_summary road_summary,
                 sub_district area
             WHERE
                 fe.id = summary.flood_event_id
                 and summary.sub_district_id = area.sub_dc_code
+                and fe.id = road_summary.flood_event_id
+                and road_summary.sub_district_id = area.sub_dc_code
                 and area.dc_code = {district_code}
                 and fe.id = {flood_event_id}
             ;
@@ -129,15 +141,20 @@ class FbfFloodData():
                 summary.total_vulnerability_score as vulnerability_total_score,
                 summary.building_count as total_buildings,
                 summary.flooded_building_count as flooded_buildings,
-                summary.trigger_status as activation_state
+                summary.trigger_status as activation_state,
+                road_summary.road_count as total_roads,
+                road_summary.flooded_flooded_road_count as flooded_roads
 
             FROM
                 hazard_event fe,
                 mv_flood_event_village_summary summary,
+                mv_flood_event_road_village_summary road_summary,
                 village area
             WHERE
                 fe.id = summary.flood_event_id
                 and summary.village_id = area.village_code
+                and fe.id = road_summary.flood_event_id
+                and road_summary.village_id = area.village_code
                 and area.sub_dc_code = {sub_district_code}
                 and fe.id = {flood_event_id}
             ;
@@ -295,6 +312,26 @@ class FbfFloodData():
     def write_not_flooded_buildings(self, instance, kwargs={}):
         try:
             return instance.total_buildings - instance.flooded_buildings
+        except Exception:
+            return 0
+
+    def write_total_roads(self, instance, kwargs={}):
+        try:
+            total_road = instance.total_roads
+        except Exception:
+            total_road = 0
+        return total_road
+
+    def write_flooded_roads(self, instance, kwargs={}):
+        try:
+            total_road = instance.flooded_roads
+        except Exception:
+            total_road = 0
+        return total_road
+
+    def write_not_flooded_roads(self, instance, kwargs={}):
+        try:
+            return instance.total_roads - instance.flooded_roads
         except Exception:
             return 0
 

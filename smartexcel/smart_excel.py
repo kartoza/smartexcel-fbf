@@ -269,14 +269,26 @@ class SmartExcel():
         :param next_available_row:
         """
         header_format = self.get_component_format(component, 'header')
+
+        try:
+            header_height = component['format']['header_height']
+        except:
+            header_height = None
+
         component_cell_format = self.get_component_format(component, 'cell')
+        next_available_row_header = next_available_row
+        if header_height:
+            header_height -= 1
+            next_available_row += header_height
 
         for column in component['columns']:
             self.write_header(
                 fd_current_sheet,
                 column,
-                next_available_row,
-                header_format)
+                next_available_row_header,
+                header_format,
+                header_height
+            )
 
             # validations
             self.set_validations(fd_current_sheet, column)
@@ -294,13 +306,19 @@ class SmartExcel():
 
         return len(values) + 1 + self.margin_component
 
-    def write_header(self, sheet, column, next_available_row, header_format):
+    def write_header(self, sheet, column, next_available_row, header_format, height):
         col = column["letter"]
         row = self.header_row + next_available_row
         cell_pos = f'{col}{row}'
 
-        # TODO: use 0;0 notation instead of A1
-        sheet.write(cell_pos, column['name'], header_format)
+        if height:
+            row_end = row + height
+            cell_pos_end = f'{col}{row_end}'
+            cell_render = f'{cell_pos}:{cell_pos_end}'
+            sheet.merge_range(cell_render, column['name'], header_format)
+        else:
+            # TODO: use 0;0 notation instead of A1
+            sheet.write(cell_pos, column['name'], header_format)
 
     def render_text_component(self, fd_current_sheet, component, next_available_row):
         """Render a Text component into the current sheet at the next available row.
