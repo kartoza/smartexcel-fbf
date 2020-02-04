@@ -348,6 +348,36 @@ class SmartExcel():
 
         return component['size']['height'] + self.margin_component
 
+    def render_text_url_component(self, fd_current_sheet, component, next_available_row):
+        """Render a Text with url component into the current sheet at the next available row.
+
+        :param fd_current_sheet:
+
+        :param component:
+
+        :param next_available_row:
+        """
+
+        first_row = next_available_row + 1
+        first_col = 0
+
+        last_row = first_row + component['size']['height']
+        last_col = first_col + (component['size']['width'] - 1)
+
+        range_format = self.get_format(component['format'])
+
+        fd_current_sheet.merge_range(
+            first_row,
+            first_col,
+            last_row,
+            last_col,
+            component['text'],
+            range_format)
+
+        fd_current_sheet.write_url(f'A{first_row + 1}', component['url'], range_format, component['text'])
+
+        return component['size']['height'] + self.margin_component
+
     def render_image_component(self, fd_current_sheet, component, next_available_row):
         """Render a Image component into the current sheet at the next available row.
 
@@ -488,6 +518,8 @@ class SmartExcel():
                 self.parse_text(**params)
             elif component['type'] == 'image':
                 self.parse_image(**params)
+            elif component['type'] == 'text_url':
+                self.parse_text_url(**params)
             else:
                 raise ValueError(f"Type `{component['type']}` not supported.")
 
@@ -754,6 +786,57 @@ class SmartExcel():
             'size': kwargs['size'],
             'format': text_format
         })
+
+    def parse_text_url(self, **kwargs):
+        """Parse a Text component.
+        Attributes:
+        - 'type': 'table' (required)
+        - 'name': a string (required)
+        - 'size': a dict (required)
+            => {
+                'width': an integer (number of cell)
+                'height': an integer (number of cell)
+            }
+        - 'text': a string
+        - 'url': a string
+        - 'format': a string
+        """
+
+        required_attrs = [
+            'name',
+            'text',
+            'url',
+            'size',
+        ]
+
+        validate_attrs(required_attrs, kwargs, 'text component')
+        validate_size(kwargs)
+
+        sheet_key = kwargs['sheet_key']
+
+        if 'format' in kwargs:
+            text_format = kwargs['format']
+        else:
+            text_format = None
+
+        if 'text' in kwargs:
+            text = kwargs['text']
+        else:
+            text = None
+
+        if 'url' in kwargs:
+            url = kwargs['url']
+        else:
+            url = None
+
+        self.sheets[sheet_key]['components'].append({
+            'type': 'text_url',
+            'text': text,
+            'size': kwargs['size'],
+            'url': url,
+            'format': text_format
+        })
+
 
     def parse_image(self, **kwargs):
         """Parse a Image component.

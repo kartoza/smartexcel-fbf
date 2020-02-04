@@ -59,6 +59,20 @@ FBF_DEFINITION = [
     },
     {
         'type': 'format',
+        'key': 'sheet_footer',
+        'format': {
+            'align': 'right',
+            'valign': 'vcenter',
+            'bold': True,
+            'font_size': 10,
+            'font_color': 'white',
+            'border': 1,
+            'bg_color': '#2F87A6',
+            'border_color': 'black'
+        }
+    },
+    {
+        'type': 'format',
         'key': 'number',
         'format': {
         },
@@ -457,6 +471,17 @@ FBF_DEFINITION = [
                         }
                     ]
                 }
+            },
+            {
+                'type': 'text_url',
+                'name': 'footer',
+                'text': 'Inasafe FbA by Kartoza',
+                'url': 'https://kartoza.com/en/project/view/33/',
+                'size': {
+                    'width': 7,
+                    'height': 1
+                },
+                'format': 'sheet_footer'
             },
         ]
     }
