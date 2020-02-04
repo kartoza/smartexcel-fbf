@@ -4,14 +4,14 @@ FBF_DEFINITION = [
         'key': 'table_header',
         'format': {
             'bold': True,
-            'font_size': 12,
+            'font_size': 11,
             'text_wrap': True,
             'align': 'center',
             'valign': 'vcenter',
             'font_color': 'white',
             'border': 1,
             'bg_color': '#2F87A6',
-            'border_color': 'black'
+            'border_color': '#2F87A6'
         }
     },
     {
@@ -31,6 +31,20 @@ FBF_DEFINITION = [
     },
     {
         'type': 'format',
+        'key': 'sheet_main_title',
+        'format': {
+            'align': 'right',
+            'valign': 'vcenter',
+            'bold': True,
+            'font_size': 18,
+            'font_color': 'white',
+            'border': 1,
+            'bg_color': '#2F87A6',
+            'border_color': '#2F87A6'
+        }
+    },
+    {
+        'type': 'format',
         'key': 'sheet_title',
         'format': {
             'align': 'center',
@@ -40,7 +54,7 @@ FBF_DEFINITION = [
             'font_color': 'white',
             'border': 1,
             'bg_color': '#2F87A6',
-            'border_color': 'black'
+            'border_color': '#2F87A6'
         }
     },
     {
@@ -54,7 +68,7 @@ FBF_DEFINITION = [
             'font_color': 'white',
             'border': 1,
             'bg_color': '#2F87A6',
-            'border_color': 'black'
+            'border_color': '#2F87A6'
         }
     },
     {
@@ -68,7 +82,7 @@ FBF_DEFINITION = [
             'font_color': 'white',
             'border': 1,
             'bg_color': '#2F87A6',
-            'border_color': 'black'
+            'border_color': '#2F87A6'
         }
     },
     {
@@ -104,7 +118,7 @@ FBF_DEFINITION = [
                     'height': 2
                 },
                 'text_func': 'main_sheet_title',
-                'format': 'sheet_title'
+                'format': 'sheet_main_title'
             },
             {
                 'type': 'image',
@@ -186,7 +200,7 @@ FBF_DEFINITION = [
                 'name': 'Flood summary Map',
                 'image_func': 'flood_summary_map',
                 'size': {
-                    'width': 700,
+                    'width': 687,
                     'height': 400
                 }
             },
@@ -265,7 +279,7 @@ FBF_DEFINITION = [
                             'name': 'District Flood summary Map',
                             'image_func': 'district_flood_summary_map',
                             'size': {
-                                'width': 700,
+                                'width': 687,
                                 'height': 400
                             }
                         },
@@ -338,7 +352,7 @@ FBF_DEFINITION = [
                                         'name': 'Sub-district Flood summary Map',
                                         'image_func': 'sub_district_flood_summary_map',
                                         'size': {
-                                            'width': 700,
+                                            'width': 687,
                                             'height': 400
                                         }
                                     },
@@ -411,7 +425,7 @@ FBF_DEFINITION = [
                                                     'name': 'Village Flood summary Map',
                                                     'image_func': 'village_flood_summary_map',
                                                     'size': {
-                                                        'width': 700,
+                                                        'width': 687,
                                                         'height': 400
                                                     }
                                                 },
