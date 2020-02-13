@@ -1,4 +1,5 @@
 import os
+from urllib.parse import urlencode
 from collections import namedtuple
 import shutil
 import requests
@@ -25,8 +26,12 @@ class FbfFloodData():
         {'id': 3, 'status': 'Stop', 'color': '#FF0000'}
     ]
 
-    def __init__(self, flood_event_id, pl_python_env=None):
+    def __init__(self, flood_event_id, pl_python_env=None, wms_base_url=None):
         self.flood_event_id = flood_event_id
+        self.wms_base_url = wms_base_url
+        if not self.wms_base_url:
+            self.wms_base_url = 'http://staging.fbf.kartoza.com/' \
+                                'geoserver/kartoza/wms'
 
         if pl_python_env:
             self.pl_python_env = pl_python_env
@@ -393,7 +398,7 @@ class FbfFloodData():
         extent = self.get_flood_extent(self.flood_event_id)[0]
         bbox = extent_to_string(extent)
 
-        url = build_wms_url(self.flood_event_id, bbox, size)
+        url = build_wms_url(self.wms_base_url, self.flood_event_id, bbox, size)
         path_map = download_map(url, f'flood_summary_map_{self.flood_event_id}.png')
 
         return path_map
@@ -439,7 +444,7 @@ class FbfFloodData():
 
         bbox = extent_to_string(extent)
 
-        url = build_wms_url(self.flood_event_id, bbox, params['size'])
+        url = build_wms_url(self.wms_base_url, self.flood_event_id, bbox, params['size'])
 
         path_map = download_map(url, params['image_name'])
         return path_map
@@ -461,14 +466,31 @@ class FbfFloodData():
         )
 
 
-def build_wms_url(flood_event_id, bbox, size):
+def build_wms_url(base_url, flood_event_id, bbox, size, styles=None):
     width = size['width']
     height = size['height']
     layer = 'kartoza:flood_map'
     cql_filter = f'flood_event_id={flood_event_id}'
     image_format = 'image/png8'
+    params = {
+        'service': 'WMS',
+        'version': '1.1.1',
+        'request': 'GetMap',
+        'format': image_format,
+        'transparent': True,
+        'layers': layer,
+        'cql_filter': cql_filter,
+        'exceptions': 'application/vnd.ogc.se_inimage',
+        'srs': 'EPSG:4326',
+        'styles': styles,
+        'width': width,
+        'height': height,
+        'bbox': bbox,
+    }
 
-    return f'http://staging.fbf.kartoza.com/geoserver/kartoza/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT={image_format}&TRANSPARENT=true&LAYERS={layer}&cql_filter={cql_filter}&exceptions=application/vnd.ogc.se_inimage&SRS=EPSG:4326&STYLES=&WIDTH={width}&HEIGHT={height}&BBOX={bbox}'
+    query_params = urlencode(params)
+
+    return f'{base_url}?{query_params}'
 
 
 def extent_to_string(extent):
