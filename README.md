@@ -72,13 +72,14 @@ CREATE OR REPLACE FUNCTION kartoza_fba_generate_excel_report_for_flood (flood_ev
        output=io.BytesIO(),
        definition=FBF_DEFINITION,
        data=FbfFloodData(
+           wms_base_url=<your geoserver wms url endpoint>
            flood_event_id=flood_event_id,
            pl_python_env=True
        )
    )
    excel.dump()
 
-   plan = plpy.prepare("UPDATE flood_event SET spreadsheet = ($1) where id = ($2)", ["bytea", "integer"])
+   plan = plpy.prepare("UPDATE spreadsheet_reports SET spreadsheet = ($1) where flood_event_id = ($2)", ["bytea", "integer"])
    plpy.execute(plan, [excel.output.getvalue(), flood_event_id])
 
    return "OK"
@@ -91,4 +92,4 @@ $$ LANGUAGE plpython3u;
 ```
 select * from kartoza_fba_generate_excel_report_for_flood(15);
 ```
-`15` is an ID present in the table `flood_event`.
+`15` is an ID present in the table `hazard_event`.
