@@ -469,8 +469,8 @@ class FbfFloodData():
 def build_wms_url(base_url, flood_event_id, bbox, size, styles=''):
     width = size['width']
     height = size['height']
-    layer = 'kartoza:flood_forecast_layer'
-    cql_filter = f'id={flood_event_id}'
+    layer = 'kartoza:flood_map'
+    cql_filter = f'flood_event_id={flood_event_id}'
     image_format = 'image/png8'
     params = {
         'service': 'WMS',
