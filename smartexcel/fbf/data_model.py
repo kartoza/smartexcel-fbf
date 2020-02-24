@@ -85,7 +85,7 @@ class FbfFloodData():
                 summary.flooded_building_count as flooded_buildings,
                 summary.trigger_status as activation_state,
                 road_summary.road_count as total_roads,
-                road_summary.flooded_flooded_road_count as flooded_roads
+                road_summary.flooded_road_count as flooded_roads
 
             FROM
                 hazard_event fe,
@@ -116,7 +116,7 @@ class FbfFloodData():
                 summary.flooded_building_count as flooded_buildings,
                 summary.trigger_status as activation_state,
                 road_summary.road_count as total_roads,
-                road_summary.flooded_flooded_road_count as flooded_roads
+                road_summary.flooded_road_count as flooded_roads
 
             FROM
                 hazard_event fe,
@@ -148,7 +148,7 @@ class FbfFloodData():
                 summary.flooded_building_count as flooded_buildings,
                 summary.trigger_status as activation_state,
                 road_summary.road_count as total_roads,
-                road_summary.flooded_flooded_road_count as flooded_roads
+                road_summary.flooded_road_count as flooded_roads
 
             FROM
                 hazard_event fe,
