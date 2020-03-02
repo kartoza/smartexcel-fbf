@@ -88,16 +88,20 @@ class FbfFloodData():
                 road_summary.flooded_road_count as flooded_roads
 
             FROM
-                hazard_event fe,
-                mv_flood_event_district_summary summary,
-                mv_flood_event_road_district_summary road_summary,
+                hazard_event fe
+                join
+                mv_flood_event_district_summary summary
+                on fe.id = summary.flood_event_id
+                join
+                mv_flood_event_road_district_summary road_summary
+                on fe.id = road_summary.flood_event_id
+                join 
                 district area
+                on (
+                    summary.district_id = area.dc_code 
+                    and road_summary.district_id = area.dc_code)
             WHERE
-                fe.id = summary.flood_event_id
-                and summary.district_id = area.dc_code
-                and fe.id = road_summary.flood_event_id
-                and road_summary.district_id = area.dc_code
-                and fe.id = {flood_event_id}
+                fe.id = {flood_event_id}
             ;
         """.format(
             flood_event_id=flood_event_id
@@ -119,17 +123,22 @@ class FbfFloodData():
                 road_summary.flooded_road_count as flooded_roads
 
             FROM
-                hazard_event fe,
-                mv_flood_event_sub_district_summary summary,
-                mv_flood_event_road_sub_district_summary road_summary,
+                hazard_event fe
+                join
+                mv_flood_event_sub_district_summary summary
+                on fe.id = summary.flood_event_id
+                join
+                mv_flood_event_road_sub_district_summary road_summary
+                on fe.id = road_summary.flood_event_id
+                join 
                 sub_district area
+                on (
+                    summary.sub_district_id = area.sub_dc_code
+                    and road_summary.sub_district_id = area.sub_dc_code)
             WHERE
-                fe.id = summary.flood_event_id
-                and summary.sub_district_id = area.sub_dc_code
-                and fe.id = road_summary.flood_event_id
-                and road_summary.sub_district_id = area.sub_dc_code
-                and area.dc_code = {district_code}
-                and fe.id = {flood_event_id}
+                fe.id = {flood_event_id}
+                and
+                summary.district_id = {district_code}
             ;
         """.format(
             district_code=district_code,
@@ -151,17 +160,22 @@ class FbfFloodData():
                 road_summary.flooded_road_count as flooded_roads
 
             FROM
-                hazard_event fe,
-                mv_flood_event_village_summary summary,
-                mv_flood_event_road_village_summary road_summary,
+                hazard_event fe
+                join
+                mv_flood_event_village_summary summary
+                on fe.id = summary.flood_event_id
+                join
+                mv_flood_event_road_village_summary road_summary
+                on fe.id = road_summary.flood_event_id
+                join 
                 village area
+                on (
+                    summary.village_id = area.village_code
+                    and road_summary.village_id = area.village_code)
             WHERE
-                fe.id = summary.flood_event_id
-                and summary.village_id = area.village_code
-                and fe.id = road_summary.flood_event_id
-                and road_summary.village_id = area.village_code
-                and area.sub_dc_code = {sub_district_code}
-                and fe.id = {flood_event_id}
+                fe.id = {flood_event_id}
+                and
+                summary.sub_district_id = {sub_district_code}
             ;
         """.format(
             sub_district_code=sub_district_code,
