@@ -5,6 +5,63 @@ total_column_width = 10
 count_column_pixel_width = 10
 # merged rows for table header
 merged_row_table_header = 3
+# Define which data are going to be shown as column
+REPORTED_COLUMN_DEFINITION = [
+    {
+        'name': 'Total Buildings',
+        'data_func': 'total_buildings',
+        'width': count_column_pixel_width,
+        'format': 'number'
+    },
+    {
+        'name': 'Flooded Buildings',
+        'data_func': 'flooded_buildings',
+        'width': count_column_pixel_width,
+        'format': 'number'
+    },
+    {
+        'name': 'Not Flooded Buildings',
+        'data_func': 'not_flooded_buildings',
+        'width': count_column_pixel_width,
+        'format': 'number'
+    },
+    {
+        'name': 'Total Roads',
+        'data_func': 'total_roads',
+        'width': count_column_pixel_width,
+        'format': 'number'
+    },
+    {
+        'name': 'Flooded Roads',
+        'data_func': 'flooded_roads',
+        'width': count_column_pixel_width,
+        'format': 'number'
+    },
+    {
+        'name': 'Not Flooded Roads',
+        'data_func': 'not_flooded_roads',
+        'width': count_column_pixel_width,
+        'format': 'number'
+    },
+    {
+        'name': 'Total Population',
+        'data_func': 'total_population',
+        'width': count_column_pixel_width,
+        'format': 'number'
+    },
+    {
+        'name': 'Potentially Affected People',
+        'data_func': 'flooded_population',
+        'width': count_column_pixel_width,
+        'format': 'number'
+    },
+    {
+        'name': 'Not Affected People',
+        'data_func': 'not_flooded_population',
+        'width': count_column_pixel_width,
+        'format': 'number'
+    }
+]
 
 FBF_DEFINITION = [
     {
@@ -227,61 +284,7 @@ FBF_DEFINITION = [
                         'width': 21,
                         'format': 'bold'
                     },
-                    {
-                        'name': 'Total Buildings',
-                        'data_func': 'total_buildings',
-                        'width': count_column_pixel_width,
-                        'format': 'number'
-                    },
-                    {
-                        'name': 'Flooded Buildings',
-                        'data_func': 'flooded_buildings',
-                        'width': count_column_pixel_width,
-                        'format': 'number'
-                    },
-                    {
-                        'name': 'Not Flooded Buildings',
-                        'data_func': 'not_flooded_buildings',
-                        'width': count_column_pixel_width,
-                        'format': 'number'
-                    },
-                    {
-                        'name': 'Total Roads',
-                        'data_func': 'total_roads',
-                        'width': count_column_pixel_width,
-                        'format': 'number'
-                    },
-                    {
-                        'name': 'Flooded Roads',
-                        'data_func': 'flooded_roads',
-                        'width': count_column_pixel_width,
-                        'format': 'number'
-                    },
-                    {
-                        'name': 'Not Flooded Roads',
-                        'data_func': 'not_flooded_roads',
-                        'width': count_column_pixel_width,
-                        'format': 'number'
-                    },
-                    {
-                        'name': 'Total Population',
-                        'data_func': 'total_population',
-                        'width': count_column_pixel_width,
-                        'format': 'number'
-                    },
-                    {
-                        'name': 'Potentially Affected People',
-                        'data_func': 'flooded_population',
-                        'width': count_column_pixel_width,
-                        'format': 'number'
-                    },
-                    {
-                        'name': 'Not Affected People',
-                        'data_func': 'not_flooded_population',
-                        'width': count_column_pixel_width,
-                        'format': 'number'
-                    }
-                ],
+                ] + REPORTED_COLUMN_DEFINITION,
                 'recursive': {
                     # create a sheet for each instance of payload
                     'name': {
@@ -319,61 +322,7 @@ FBF_DEFINITION = [
                                     'width': 21,
                                     'format': 'bold'
                                 },
-                                {
-                                    'name': 'Total Buildings',
-                                    'data_func': 'total_buildings',
-                                    'width': count_column_pixel_width,
-                                    'format': 'number'
-                                },
-                                {
-                                    'name': 'Flooded Buildings',
-                                    'data_func': 'flooded_buildings',
-                                    'width': count_column_pixel_width,
-                                    'format': 'number'
-                                },
-                                {
-                                    'name': 'Not Flooded Buildings',
-                                    'data_func': 'not_flooded_buildings',
-                                    'width': count_column_pixel_width,
-                                    'format': 'number'
-                                },
-                                {
-                                    'name': 'Total Roads',
-                                    'data_func': 'total_roads',
-                                    'width': count_column_pixel_width,
-                                    'format': 'number'
-                                },
-                                {
-                                    'name': 'Flooded Roads',
-                                    'data_func': 'flooded_roads',
-                                    'width': count_column_pixel_width,
-                                    'format': 'number'
-                                },
-                                {
-                                    'name': 'Not Flooded Roads',
-                                    'data_func': 'not_flooded_roads',
-                                    'width': count_column_pixel_width,
-                                    'format': 'number'
-                                },
-                                {
-                                    'name': 'Total Population',
-                                    'data_func': 'total_population',
-                                    'width': count_column_pixel_width,
-                                    'format': 'number'
-                                },
-                                {
-                                    'name': 'Potentially Affected People',
-                                    'data_func': 'flooded_population',
-                                    'width': count_column_pixel_width,
-                                    'format': 'number'
-                                },
-                                {
-                                    'name': 'Not Affected People',
-                                    'data_func': 'not_flooded_population',
-                                    'width': count_column_pixel_width,
-                                    'format': 'number'
-                                }
-                            ],
+                            ] + REPORTED_COLUMN_DEFINITION,
                             'recursive': {
                                 'name': {
                                     'func': 'village_summary'
@@ -410,61 +359,7 @@ FBF_DEFINITION = [
                                                 'width': 21,
                                                 'format': 'bold'
                                             },
-                                            {
-                                                'name': 'Total Buildings',
-                                                'data_func': 'total_buildings',
-                                                'width': count_column_pixel_width,
-                                                'format': 'number'
-                                            },
-                                            {
-                                                'name': 'Flooded Buildings',
-                                                'data_func': 'flooded_buildings',
-                                                'width': count_column_pixel_width,
-                                                'format': 'number'
-                                            },
-                                            {
-                                                'name': 'Not Flooded Buildings',
-                                                'data_func': 'not_flooded_buildings',
-                                                'width': count_column_pixel_width,
-                                                'format': 'number'
-                                            },
-                                            {
-                                                'name': 'Total Roads',
-                                                'data_func': 'total_roads',
-                                                'width': count_column_pixel_width,
-                                                'format': 'number'
-                                            },
-                                            {
-                                                'name': 'Flooded Roads',
-                                                'data_func': 'flooded_roads',
-                                                'width': count_column_pixel_width,
-                                                'format': 'number'
-                                            },
-                                            {
-                                                'name': 'Not Flooded Roads',
-                                                'data_func': 'not_flooded_roads',
-                                                'width': count_column_pixel_width,
-                                                'format': 'number'
-                                            },
-                                            {
-                                                'name': 'Total Population',
-                                                'data_func': 'total_population',
-                                                'width': count_column_pixel_width,
-                                                'format': 'number'
-                                            },
-                                            {
-                                                'name': 'Potentially Affected People',
-                                                'data_func': 'flooded_population',
-                                                'width': count_column_pixel_width,
-                                                'format': 'number'
-                                            },
-                                            {
-                                                'name': 'Not Affected People',
-                                                'data_func': 'not_flooded_population',
-                                                'width': count_column_pixel_width,
-                                                'format': 'number'
-                                            }
-                                        ],
+                                        ] + REPORTED_COLUMN_DEFINITION,
                                         'recursive': {
                                             'name': {
                                                 'func': 'village_detail'
@@ -501,61 +396,7 @@ FBF_DEFINITION = [
                                                             'width': 21,
                                                             'format': 'bold'
                                                         },
-                                                        {
-                                                            'name': 'Total Buildings',
-                                                            'data_func': 'total_buildings',
-                                                            'format': 'number',
-                                                            'width': count_column_pixel_width,
-                                                        },
-                                                        {
-                                                            'name': 'Flooded Buildings',
-                                                            'data_func': 'flooded_buildings',
-                                                            'format': 'number',
-                                                            'width': count_column_pixel_width,
-                                                        },
-                                                        {
-                                                            'name': 'Not Flooded Buildings',
-                                                            'data_func': 'not_flooded_buildings',
-                                                            'format': 'number',
-                                                            'width': count_column_pixel_width,
-                                                        },
-                                                        {
-                                                            'name': 'Total Roads',
-                                                            'data_func': 'total_roads',
-                                                            'width': count_column_pixel_width,
-                                                            'format': 'number'
-                                                        },
-                                                        {
-                                                            'name': 'Flooded Roads',
-                                                            'data_func': 'flooded_roads',
-                                                            'width': count_column_pixel_width,
-                                                            'format': 'number'
-                                                        },
-                                                        {
-                                                            'name': 'Not Flooded Roads',
-                                                            'data_func': 'not_flooded_roads',
-                                                            'width': count_column_pixel_width,
-                                                            'format': 'number'
-                                                        },
-                                                        {
-                                                            'name': 'Total Population',
-                                                            'data_func': 'total_population',
-                                                            'width': count_column_pixel_width,
-                                                            'format': 'number'
-                                                        },
-                                                        {
-                                                            'name': 'Potentially Affected People',
-                                                            'data_func': 'flooded_population',
-                                                            'width': count_column_pixel_width,
-                                                            'format': 'number'
-                                                        },
-                                                        {
-                                                            'name': 'Not Affected People',
-                                                            'data_func': 'not_flooded_population',
-                                                            'width': count_column_pixel_width,
-                                                            'format': 'number'
-                                                        }
-                                                    ]
+                                                    ] + REPORTED_COLUMN_DEFINITION
                                                 },
                                             ]
                                         }
