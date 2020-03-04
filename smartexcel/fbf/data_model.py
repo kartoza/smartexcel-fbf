@@ -85,7 +85,9 @@ class FbfFloodData():
                 summary.flooded_building_count as flooded_buildings,
                 summary.trigger_status as activation_state,
                 road_summary.road_count as total_roads,
-                road_summary.flooded_road_count as flooded_roads
+                road_summary.flooded_road_count as flooded_roads,
+                population_summary.population_count as total_population,
+                population_summary.flooded_population_count as flooded_population
 
             FROM
                 hazard_event fe
@@ -96,10 +98,14 @@ class FbfFloodData():
                 mv_flood_event_road_district_summary road_summary
                 on fe.id = road_summary.flood_event_id
                 join 
+                mv_flood_event_population_district_summary population_summary
+                on fe.id = population_summary.flood_event_id
+                join
                 district area
                 on (
                     summary.district_id = area.dc_code 
-                    and road_summary.district_id = area.dc_code)
+                    and road_summary.district_id = area.dc_code
+                    and population_summary.district_id = area.dc_code)
             WHERE
                 fe.id = {flood_event_id}
             ;
@@ -120,7 +126,9 @@ class FbfFloodData():
                 summary.flooded_building_count as flooded_buildings,
                 summary.trigger_status as activation_state,
                 road_summary.road_count as total_roads,
-                road_summary.flooded_road_count as flooded_roads
+                road_summary.flooded_road_count as flooded_roads,
+                population_summary.population_count as total_population,
+                population_summary.flooded_population_count as flooded_population
 
             FROM
                 hazard_event fe
@@ -131,10 +139,14 @@ class FbfFloodData():
                 mv_flood_event_road_sub_district_summary road_summary
                 on fe.id = road_summary.flood_event_id
                 join 
+                mv_flood_event_population_sub_district_summary population_summary
+                on fe.id = population_summary.flood_event_id
+                join
                 sub_district area
                 on (
                     summary.sub_district_id = area.sub_dc_code
-                    and road_summary.sub_district_id = area.sub_dc_code)
+                    and road_summary.sub_district_id = area.sub_dc_code
+                    and population_summary.sub_district_id = area.sub_dc_code)
             WHERE
                 fe.id = {flood_event_id}
                 and
@@ -157,7 +169,9 @@ class FbfFloodData():
                 summary.flooded_building_count as flooded_buildings,
                 summary.trigger_status as activation_state,
                 road_summary.road_count as total_roads,
-                road_summary.flooded_road_count as flooded_roads
+                road_summary.flooded_road_count as flooded_roads,
+                population_summary.population_count as total_population,
+                population_summary.flooded_population_count as flooded_population
 
             FROM
                 hazard_event fe
@@ -168,10 +182,14 @@ class FbfFloodData():
                 mv_flood_event_road_village_summary road_summary
                 on fe.id = road_summary.flood_event_id
                 join 
+                mv_flood_event_population_village_summary population_summary
+                on fe.id = population_summary.flood_event_id
+                join
                 village area
                 on (
                     summary.village_id = area.village_code
-                    and road_summary.village_id = area.village_code)
+                    and road_summary.village_id = area.village_code
+                    and population_summary.village_id = area.village_code)
             WHERE
                 fe.id = {flood_event_id}
                 and
@@ -210,13 +228,9 @@ class FbfFloodData():
 
     def get_area_extent(self, params, area_code):
         query = """
-            SELECT
-                st_xmin(st_extent((st_buffer(geom, 0.25)::geography)::geometry)) as x_min,
-                st_ymin(st_extent((st_buffer(geom, 0.25)::geography)::geometry)) as y_min,
-                st_xmax(st_extent((st_buffer(geom, 0.25)::geography)::geometry)) as x_max,
-                st_ymax(st_extent((st_buffer(geom, 0.25)::geography)::geometry)) as y_max
-            FROM {table}
-            WHERE {foreign_key} = '{area_code}'
+            SELECT x_min, y_min, x_max, y_max
+            FROM vw_{table}_extent
+            WHERE id_code = '{area_code}'
         """.format(
             table=params['table'],
             foreign_key=params['foreign_key'],
@@ -354,6 +368,26 @@ class FbfFloodData():
         except Exception:
             return 0
 
+    def write_total_population(self, instance, kwargs={}):
+        try:
+            total_population = instance.total_population
+        except Exception:
+            total_population = 0
+        return total_population
+
+    def write_flooded_population(self, instance, kwargs={}):
+        try:
+            flooded_population = instance.flooded_population
+        except Exception:
+            flooded_population = 0
+        return flooded_population
+
+    def write_not_flooded_population(self, instance, kwargs={}):
+        try:
+            return instance.total_population - instance.flooded_population
+        except Exception:
+            return 0
+
     def write_vulnerability_total_score(self, instance, kwargs={}):
         return instance[kwargs['index']]['vulnerability_total_score']
 
@@ -399,7 +433,9 @@ class FbfFloodData():
     def get_image_kartoza_logo(self, size):
         return path_to_image('kartoza2.png')
 
-    def get_image_flood_summary_map(self, size):
+    def map_ratio_calculations(self, extent, image_ratio):
+        # bbox and size has to be proportionals
+
         # substract x_max and x_min => width
         # substract y_max and y_min => height
 
@@ -409,7 +445,39 @@ class FbfFloodData():
         # if bigger, scale the height
         # y_max * image_ratio / extent_radio
         # if smaller, scale the width
+
+        extent_width, extent_height = extent.x_max - extent.x_min, extent.y_max - extent.y_min
+        # create mutable extent to store the new extent value
+        Extent = namedtuple('Extent', 'x_min y_min x_max y_max')
+        extent_ratio = extent_width / extent_height
+        if extent_ratio > image_ratio:
+            # width of the bbox is bigger. accommodate more height
+            new_extent_height = extent_ratio / image_ratio * extent_height
+            half_difference = (new_extent_height - extent_height) / 2
+            # Add buffer of 1/10 of total width or height
+            x_buffer = extent_width / 10
+            y_buffer = new_extent_height / 10
+            extent = Extent(
+                x_min=extent.x_min - x_buffer, y_min=extent.y_min - half_difference - y_buffer,
+                x_max=extent.x_max + x_buffer, y_max=extent.y_max + half_difference + y_buffer)
+        else:
+            # height of the bbox is bigger. accommodate more width
+            new_extent_width = image_ratio / extent_ratio * extent_width
+            half_difference = (new_extent_width - extent_width) / 2
+            # Add buffer of 1/10 of total width or height
+            x_buffer = new_extent_width / 10
+            y_buffer = extent_height / 10
+
+            extent = Extent(
+                x_min=extent.x_min - half_difference -  x_buffer, y_min=extent.y_min - y_buffer,
+                x_max=extent.x_max + half_difference + x_buffer, y_max=extent.y_max + y_buffer)
+        return extent
+
+    def get_image_flood_summary_map(self, size):
+
         extent = self.get_flood_extent(self.flood_event_id)[0]
+        extent = self.map_ratio_calculations(
+            extent, size['width'] / size['height'])
         bbox = extent_to_string(extent)
 
         url = build_wms_url(self.wms_base_url, self.flood_event_id, bbox, size)
@@ -455,6 +523,9 @@ class FbfFloodData():
             'table': params['table'],
             'foreign_key': params['foreign_key']
         }, params['area_code'])[0]
+
+        extent = self.map_ratio_calculations(
+            extent, params['size']['width'] / params['size']['height'])
 
         bbox = extent_to_string(extent)
 
