@@ -14,13 +14,13 @@ REPORTED_COLUMN_DEFINITION = [
         'format': 'number'
     },
     {
-        'name': 'Flooded Buildings',
+        'name': 'Impacted Buildings',
         'data_func': 'flooded_buildings',
         'width': count_column_pixel_width,
         'format': 'number'
     },
     {
-        'name': 'Not Flooded Buildings',
+        'name': 'Not Impacted Buildings',
         'data_func': 'not_flooded_buildings',
         'width': count_column_pixel_width,
         'format': 'number'
@@ -32,13 +32,13 @@ REPORTED_COLUMN_DEFINITION = [
         'format': 'number'
     },
     {
-        'name': 'Flooded Roads',
+        'name': 'Impacted Roads',
         'data_func': 'flooded_roads',
         'width': count_column_pixel_width,
         'format': 'number'
     },
     {
-        'name': 'Not Flooded Roads',
+        'name': 'Not Impacted Roads',
         'data_func': 'not_flooded_roads',
         'width': count_column_pixel_width,
         'format': 'number'
@@ -209,7 +209,7 @@ FBF_DEFINITION = [
                 },
             },
             {
-                'name': 'Flood metadata',
+                'name': 'Impact metadata',
                 'type': 'map',
                 'position': {
                     'margin': {
@@ -262,7 +262,7 @@ FBF_DEFINITION = [
             },
             {
                 'type': 'image',
-                'name': 'Flood summary Map',
+                'name': 'Impact summary Map',
                 'image_func': 'flood_summary_map',
                 'size': {
                     'width': 687,
@@ -270,17 +270,17 @@ FBF_DEFINITION = [
                 }
             },
             {
-                'name': 'Flood Summary View',
+                'name': 'Impact Summary View',
                 'type': 'table',
-                'payload': 'districts',
+                'payload': 'countries',
                 'format': {
                     'header': 'table_header',
                     'header_height': merged_row_table_header
                 },
                 'columns': [
                     {
-                        'name': 'District Name',
-                        'data_func': 'district_name',
+                        'name': 'Country Name',
+                        'data_func': 'country_name',
                         'width': 21,
                         'format': 'bold'
                     },
@@ -288,99 +288,99 @@ FBF_DEFINITION = [
                 'recursive': {
                     # create a sheet for each instance of payload
                     'name': {
-                        'func': 'subdistrict_summary'
+                        'func': 'district_summary'
                     },
-                    'foreign_key': 'district_code',
-                    'payload_func': 'subdistricts',
+                    'foreign_key': 'country_code',
+                    'payload_func': 'districts',
                     'components': [
                         {
                             'type': 'text',
-                            'name': 'District Sheet Title',
+                            'name': 'Country Sheet Title',
                             'size': {
                                 'width': total_column_width,
                                 'height': 2
                             },
-                            'text_func': 'district_sheet_title',
+                            'text_func': 'country_sheet_title',
                             'format': 'sheet_title'
                         },
                         {
                             'type': 'image',
-                            'name': 'District Flood summary Map',
-                            'image_func': 'district_flood_summary_map',
+                            'name': 'Country Impact summary Map',
+                            'image_func': 'country_flood_summary_map',
                             'size': {
                                 'width': 687,
                                 'height': 400
                             }
                         },
                         {
-                            'name': 'Sub-districts',
+                            'name': 'Districts',
                             'type': 'table',
                             'columns': [
                                 {
-                                    'name': 'Sub-district Name',
-                                    'data_func': 'sub_district_name',
+                                    'name': 'District Name',
+                                    'data_func': 'district_name',
                                     'width': 21,
                                     'format': 'bold'
                                 },
                             ] + REPORTED_COLUMN_DEFINITION,
                             'recursive': {
                                 'name': {
-                                    'func': 'village_summary'
+                                    'func': 'subdistrict_summary'
                                 },
-                                'foreign_key': 'sub_district_code',
-                                'payload_func': 'villages',
+                                'foreign_key': 'district_code',
+                                'payload_func': 'subdistricts',
                                 'components': [
                                     {
                                         'type': 'text',
-                                        'name': 'Sub-district Sheet Title',
+                                        'name': 'District Sheet Title',
                                         'size': {
                                             'width': total_column_width,
                                             'height': 2
                                         },
-                                        'text_func': 'sub_district_sheet_title',
+                                        'text_func': 'district_sheet_title',
                                         'format': 'sheet_title'
                                     },
                                     {
                                         'type': 'image',
-                                        'name': 'Sub-district Flood summary Map',
-                                        'image_func': 'sub_district_flood_summary_map',
+                                        'name': 'District Impact summary Map',
+                                        'image_func': 'district_flood_summary_map',
                                         'size': {
                                             'width': 687,
                                             'height': 400
                                         }
                                     },
                                     {
-                                        'name': 'Villages',
+                                        'name': 'Sub-districts',
                                         'type': 'table',
                                         'columns': [
                                             {
-                                                'name': 'Village Name',
-                                                'data_func': 'village_name',
+                                                'name': 'Sub District Name',
+                                                'data_func': 'sub_district_name',
                                                 'width': 21,
                                                 'format': 'bold'
                                             },
                                         ] + REPORTED_COLUMN_DEFINITION,
                                         'recursive': {
                                             'name': {
-                                                'func': 'village_detail'
+                                                'func': 'subdistrict_detail'
                                             },
-                                            'foreign_key': 'village_code',
-                                            'payload_func': 'village_detail',
+                                            'foreign_key': 'sub_district_code',
+                                            'payload_func': 'subdistrict_detail',
                                             'components': [
                                                 {
                                                     'type': 'text',
-                                                    'name': 'Village Sheet Title',
+                                                    'name': 'Sub District Sheet Title',
                                                     'size': {
                                                         'width': total_column_width,
                                                         'height': 2
                                                     },
-                                                    'text_func': 'village_sheet_title',
+                                                    'text_func': 'sub_district_sheet_title',
                                                     'format': 'sheet_title'
                                                 },
                                                 {
                                                     'type': 'image',
-                                                    'name': 'Village Flood summary Map',
-                                                    'image_func': 'village_flood_summary_map',
+                                                    'name': 'Sub District Impact summary Map',
+                                                    'image_func': 'sub_district_flood_summary_map',
                                                     'size': {
                                                         'width': 687,
                                                         'height': 400
@@ -388,11 +388,11 @@ FBF_DEFINITION = [
                                                 },
                                                 {
                                                     'type': 'table',
-                                                    'name': 'Village detail summary',
+                                                    'name': 'Sub District detail summary',
                                                     'columns': [
                                                         {
-                                                            'name': 'Village Name',
-                                                            'data_func': 'village_name',
+                                                            'name': 'Sub District Name',
+                                                            'data_func': 'sub_district_name',
                                                             'width': 21,
                                                             'format': 'bold'
                                                         },

@@ -44,11 +44,11 @@ class FbfFloodData():
                 database=os.environ['DB_DATABASE'])
             self.pl_python_env = False
 
-        districts_summary = self.get_districts(flood_event_id)
+        countries_summary = self.get_countries(flood_event_id)
 
         self.results = {
             'flood': self.get_flood(flood_event_id),
-            'districts': districts_summary
+            'countries': countries_summary
         }
 
     def execute_query(self, query):
@@ -74,131 +74,256 @@ class FbfFloodData():
 
         return results
 
-    def get_districts(self, flood_event_id):
+    def get_countries(self, flood_event_id):
 
-        query = """
-            SELECT
-                area.name as district_name,
-                area.dc_code as district_code,
-                summary.total_vulnerability_score as vulnerability_total_score,
-                summary.building_count as total_buildings,
-                summary.flooded_building_count as flooded_buildings,
-                summary.trigger_status as activation_state,
-                road_summary.road_count as total_roads,
-                road_summary.flooded_road_count as flooded_roads,
-                population_summary.population_count as total_population,
-                population_summary.flooded_population_count as flooded_population
+        query = f"""
+            select
+                event_id,
+                country.name as country_name,
+                country_id as country_code,
+                sum(vulnerability_score) as vulnerability_score,
+                sum(total_buildings) as total_buildings,
+                sum(flooded_buildings) as flooded_buildings,
+                sum(activation_state) as activation_state,
+                sum(total_roads) as total_roads,
+                sum(flooded_roads) as flooded_roads,
+                sum(total_population) as total_population,
+                sum(flooded_population) as flooded_population
+            from
+                (select
+                flood_event_id as event_id,
+                country_id,
+                total_vulnerability_score as vulnerability_score,
+                building_count as total_buildings,
+                flooded_building_count as flooded_buildings,
+                trigger_status as activation_state,
+                null::int as total_roads,
+                null::int as flooded_roads,
+                null::int as total_population,
+                null::int as flooded_population
+            from mv_flood_event_country_summary
+            union
+            select
+                flood_event_id as event_id,
+                country_id,
+                null::int as vulnerability_score,
+                null::int as total_buildings,
+                null::int as flooded_buildings,
+                null::int as activation_state,
+                road_count as total_roads,
+                flooded_road_count as flooded_roads,
+                null::int as total_population,
+                null::int as flooded_population
+            from mv_flood_event_road_country_summary
+            union
+            select
+                flood_event_id as event_id,
+                country_id,
+                null::int as vulnerability_score,
+                null::int as total_buildings,
+                null::int as flooded_buildings,
+                null::int as activation_state,
+                null::int as total_roads,
+                null::int as flooded_roads,
+                population_count as total_population,
+                flooded_population_count as flooded_population
+            from mv_flood_event_population_country_summary) impact
+            join country on impact.country_id = country.country_code
+            where impact.event_id = {flood_event_id}
+            group by event_id, country_id, name
+            order by name asc
+        """
 
-            FROM
-                hazard_event fe
-                join
-                mv_flood_event_district_summary summary
-                on fe.id = summary.flood_event_id
-                join
-                mv_flood_event_road_district_summary road_summary
-                on fe.id = road_summary.flood_event_id
-                join 
-                mv_flood_event_population_district_summary population_summary
-                on fe.id = population_summary.flood_event_id
-                join
-                district area
-                on (
-                    summary.district_id = area.dc_code 
-                    and road_summary.district_id = area.dc_code
-                    and population_summary.district_id = area.dc_code)
-            WHERE
-                fe.id = {flood_event_id}
-            ;
-        """.format(
-            flood_event_id=flood_event_id
-        )
+        return self.execute_query(query)
+
+    def get_districts(self, flood_event_id, country_code):
+
+        query = f"""
+            select
+                event_id,
+                district.name as district_name,
+                district_id as district_code,
+                sum(vulnerability_score) as vulnerability_score,
+                sum(total_buildings) as total_buildings,
+                sum(flooded_buildings) as flooded_buildings,
+                sum(activation_state) as activation_state,
+                sum(total_roads) as total_roads,
+                sum(flooded_roads) as flooded_roads,
+                sum(total_population) as total_population,
+                sum(flooded_population) as flooded_population
+            from
+                (select
+                flood_event_id as event_id,
+                district_id,
+                total_vulnerability_score as vulnerability_score,
+                building_count as total_buildings,
+                flooded_building_count as flooded_buildings,
+                trigger_status as activation_state,
+                null::int as total_roads,
+                null::int as flooded_roads,
+                null::int as total_population,
+                null::int as flooded_population
+            from mv_flood_event_district_summary
+            union
+            select
+                flood_event_id as event_id,
+                district_id,
+                null::int as vulnerability_score,
+                null::int as total_buildings,
+                null::int as flooded_buildings,
+                null::int as activation_state,
+                road_count as total_roads,
+                flooded_road_count as flooded_roads,
+                null::int as total_population,
+                null::int as flooded_population
+            from mv_flood_event_road_district_summary
+            union
+            select
+                flood_event_id as event_id,
+                district_id,
+                null::int as vulnerability_score,
+                null::int as total_buildings,
+                null::int as flooded_buildings,
+                null::int as activation_state,
+                null::int as total_roads,
+                null::int as flooded_roads,
+                population_count as total_population,
+                flooded_population_count as flooded_population
+            from mv_flood_event_population_district_summary) impact
+            join district on impact.district_id = district.dc_code
+            where 
+                impact.event_id = {flood_event_id}
+                and district.country_code = {country_code}
+            group by event_id, district_id, name
+            order by name asc
+        """
 
         return self.execute_query(query)
 
     def get_subdistricts(self, flood_event_id, district_code):
 
-        query = """
-            SELECT
-                area.name as sub_district_name,
-                area.sub_dc_code as sub_district_code,
-                summary.total_vulnerability_score as vulnerability_total_score,
-                summary.building_count as total_buildings,
-                summary.flooded_building_count as flooded_buildings,
-                summary.trigger_status as activation_state,
-                road_summary.road_count as total_roads,
-                road_summary.flooded_road_count as flooded_roads,
-                population_summary.population_count as total_population,
-                population_summary.flooded_population_count as flooded_population
-
-            FROM
-                hazard_event fe
-                join
-                mv_flood_event_sub_district_summary summary
-                on fe.id = summary.flood_event_id
-                join
-                mv_flood_event_road_sub_district_summary road_summary
-                on fe.id = road_summary.flood_event_id
-                join 
-                mv_flood_event_population_sub_district_summary population_summary
-                on fe.id = population_summary.flood_event_id
-                join
-                sub_district area
-                on (
-                    summary.sub_district_id = area.sub_dc_code
-                    and road_summary.sub_district_id = area.sub_dc_code
-                    and population_summary.sub_district_id = area.sub_dc_code)
-            WHERE
-                fe.id = {flood_event_id}
-                and
-                summary.district_id = {district_code}
-            ;
-        """.format(
-            district_code=district_code,
-            flood_event_id=flood_event_id
-        )
+        query = f"""
+            select
+                event_id,
+                sub_district.name as sub_district_name,
+                sub_district_id as sub_district_code,
+                sum(vulnerability_score) as vulnerability_score,
+                sum(total_buildings) as total_buildings,
+                sum(flooded_buildings) as flooded_buildings,
+                sum(activation_state) as activation_state,
+                sum(total_roads) as total_roads,
+                sum(flooded_roads) as flooded_roads,
+                sum(total_population) as total_population,
+                sum(flooded_population) as flooded_population
+            from
+                (select
+                flood_event_id as event_id,
+                sub_district_id,
+                total_vulnerability_score as vulnerability_score,
+                building_count as total_buildings,
+                flooded_building_count as flooded_buildings,
+                trigger_status as activation_state,
+                null::int as total_roads,
+                null::int as flooded_roads,
+                null::int as total_population,
+                null::int as flooded_population
+            from mv_flood_event_sub_district_summary
+            union
+            select
+                flood_event_id as event_id,
+                sub_district_id,
+                null::int as vulnerability_score,
+                null::int as total_buildings,
+                null::int as flooded_buildings,
+                null::int as activation_state,
+                road_count as total_roads,
+                flooded_road_count as flooded_roads,
+                null::int as total_population,
+                null::int as flooded_population
+            from mv_flood_event_road_sub_district_summary
+            union
+            select
+                flood_event_id as event_id,
+                sub_district_id,
+                null::int as vulnerability_score,
+                null::int as total_buildings,
+                null::int as flooded_buildings,
+                null::int as activation_state,
+                null::int as total_roads,
+                null::int as flooded_roads,
+                population_count as total_population,
+                flooded_population_count as flooded_population
+            from mv_flood_event_population_sub_district_summary) impact
+            join sub_district on impact.sub_district_id = sub_district.sub_dc_code
+            where 
+                impact.event_id = {flood_event_id}
+                and sub_district.dc_code = {district_code}
+            group by event_id, sub_district_id, name
+            order by name asc
+        """
 
         return self.execute_query(query)
 
     def get_villages(self, flood_event_id, sub_district_code):
-        query = """
-            SELECT
-                area.name as village_name,
-                area.village_code as village_code,
-                summary.total_vulnerability_score as vulnerability_total_score,
-                summary.building_count as total_buildings,
-                summary.flooded_building_count as flooded_buildings,
-                summary.trigger_status as activation_state,
-                road_summary.road_count as total_roads,
-                road_summary.flooded_road_count as flooded_roads,
-                population_summary.population_count as total_population,
-                population_summary.flooded_population_count as flooded_population
-
-            FROM
-                hazard_event fe
-                join
-                mv_flood_event_village_summary summary
-                on fe.id = summary.flood_event_id
-                join
-                mv_flood_event_road_village_summary road_summary
-                on fe.id = road_summary.flood_event_id
-                join 
-                mv_flood_event_population_village_summary population_summary
-                on fe.id = population_summary.flood_event_id
-                join
-                village area
-                on (
-                    summary.village_id = area.village_code
-                    and road_summary.village_id = area.village_code
-                    and population_summary.village_id = area.village_code)
-            WHERE
-                fe.id = {flood_event_id}
-                and
-                summary.sub_district_id = {sub_district_code}
-            ;
-        """.format(
-            sub_district_code=sub_district_code,
-            flood_event_id=flood_event_id
-        )
+        query = f"""
+            select
+                event_id,
+                village.name as village_name,
+                village_id as village_code,
+                sum(vulnerability_score) as vulnerability_score,
+                sum(total_buildings) as total_buildings,
+                sum(flooded_buildings) as flooded_buildings,
+                sum(activation_state) as activation_state,
+                sum(total_roads) as total_roads,
+                sum(flooded_roads) as flooded_roads,
+                sum(total_population) as total_population,
+                sum(flooded_population) as flooded_population
+            from
+                (select
+                flood_event_id as event_id,
+                village_id,
+                total_vulnerability_score as vulnerability_score,
+                building_count as total_buildings,
+                flooded_building_count as flooded_buildings,
+                trigger_status as activation_state,
+                null::int as total_roads,
+                null::int as flooded_roads,
+                null::int as total_population,
+                null::int as flooded_population
+            from mv_flood_event_village_summary
+            union
+            select
+                flood_event_id as event_id,
+                village_id,
+                null::int as vulnerability_score,
+                null::int as total_buildings,
+                null::int as flooded_buildings,
+                null::int as activation_state,
+                road_count as total_roads,
+                flooded_road_count as flooded_roads,
+                null::int as total_population,
+                null::int as flooded_population
+            from mv_flood_event_road_village_summary
+            union
+            select
+                flood_event_id as event_id,
+                village_id,
+                null::int as vulnerability_score,
+                null::int as total_buildings,
+                null::int as flooded_buildings,
+                null::int as activation_state,
+                null::int as total_roads,
+                null::int as flooded_roads,
+                population_count as total_population,
+                flooded_population_count as flooded_population
+            from mv_flood_event_population_village_summary) impact
+            join village on impact.village_id = village.village_code
+            where 
+                impact.event_id = {flood_event_id}
+                and village.sub_dc_code = {sub_district_code}
+            group by event_id, village_id, name
+            order by name asc
+        """
 
         return self.execute_query(query)
 
@@ -238,6 +363,10 @@ class FbfFloodData():
         )
         return self.execute_query(query)
 
+    def get_payload_districts(self, instance, foreign_key):
+        country_code = int(getattr(instance, foreign_key))
+        return self.get_districts(self.flood_event_id, country_code)
+
     def get_payload_subdistricts(self, instance, foreign_key):
         district_code = int(getattr(instance, foreign_key))
         return self.get_subdistricts(self.flood_event_id, district_code)
@@ -246,14 +375,25 @@ class FbfFloodData():
         sub_district_code = int(getattr(instance, foreign_key))
         return self.get_villages(self.flood_event_id, sub_district_code)
 
+    def get_payload_subdistrict_detail(self, instance, foreign_key):
+        return [instance]
+
     def get_payload_village_detail(self, instance, foreign_key):
         return [instance]
 
     def get_sheet_name_for_flood_summary(self, kwargs={}):
-        return f"Flood Summary"
+        return f"Impact Summary"
+
+    def get_sheet_name_for_district_summary(self, instance, kwargs={}):
+        name = f"Country {instance.country_name} Summary"
+        return name[0:30]
 
     def get_sheet_name_for_subdistrict_summary(self, instance, kwargs={}):
         name = f"District {instance.district_name} Summary"
+        return name[0:30]
+
+    def get_sheet_name_for_subdistrict_detail(self, instance, kwargs={}):
+        name = f"Sub District {instance.sub_district_name} Summary"
         return name[0:30]
 
     def get_sheet_name_for_village_summary(self, instance, kwargs={}):
@@ -265,7 +405,7 @@ class FbfFloodData():
         return name[0:30]
 
     def write_flood_title(self, instance, kwargs={}):
-        return f"Flood {instance.id}"
+        return f"Impact {instance.id}"
 
     def write_flood_acquisition_date(self, instance, kwargs={}):
         try:
@@ -314,6 +454,9 @@ class FbfFloodData():
 
         cell_format['bg_color'] = '#ddddd'
         return cell_format
+
+    def write_country_name(self, instance, kwargs={}):
+        return instance.country_name
 
     def write_district_name(self, instance, kwargs={}):
         return instance.district_name
@@ -410,10 +553,13 @@ class FbfFloodData():
         return instance.clinic_dr_flooded_building_count
 
     def get_text_for_main_sheet_title(self):
-        return 'FbF Flood Summary Report'
+        return 'FbF Impact Summary Report'
 
     def get_text_for_main_sheet_sub_title(self):
         return 'Overview Map'
+
+    def get_text_for_country_sheet_title(self, instance):
+        return f'Country: {instance.country_name}'
 
     def get_text_for_district_sheet_title(self, instance):
         return f'District: {instance.district_name}'
@@ -485,6 +631,17 @@ class FbfFloodData():
 
         return path_map
 
+    def get_image_country_flood_summary_map(self, instance, size):
+        params = {
+            'size': size,
+            'table': 'country',
+            'foreign_key': 'country_code',
+            'area_code': int(instance.country_code),
+            'image_name': f'district_{instance.country_code}_flood_summary_map_{self.flood_event_id}.png'
+        }
+
+        return self.get_map_path(params)
+
     def get_image_district_flood_summary_map(self, instance, size):
         params = {
             'size': size,
@@ -529,7 +686,9 @@ class FbfFloodData():
 
         bbox = extent_to_string(extent)
 
-        url = build_wms_url(self.wms_base_url, self.flood_event_id, bbox, params['size'])
+        url = build_wms_url(
+            self.wms_base_url, self.flood_event_id, bbox, params['size'],
+            table=params['table'], table_id=params['area_code'])
 
         path_map = download_map(url, params['image_name'])
         return path_map
@@ -551,12 +710,12 @@ class FbfFloodData():
         )
 
 
-def build_wms_url(base_url, flood_event_id, bbox, size, styles=''):
+def build_wms_url(base_url, flood_event_id, bbox, size, styles='', table='', table_id=None):
     width = size['width']
     height = size['height']
-    layer = 'kartoza:flood_map'
+    layer = 'hurricane_noaa_map'
     cql_filter = f'flood_event_id={flood_event_id}'
-    image_format = 'image/png8'
+    image_format = 'image/png; mode=8bit'
     params = {
         'service': 'WMS',
         'version': '1.1.1',
@@ -571,6 +730,8 @@ def build_wms_url(base_url, flood_event_id, bbox, size, styles=''):
         'width': width,
         'height': height,
         'bbox': bbox,
+        'level': table,
+        'area_id': table_id
     }
 
     query_params = urlencode(params)
