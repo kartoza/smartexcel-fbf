@@ -715,7 +715,7 @@ def build_wms_url(base_url, flood_event_id, bbox, size, styles='', table='', tab
     height = size['height']
     layer = 'hurricane_noaa_map'
     cql_filter = f'flood_event_id={flood_event_id}'
-    image_format = 'image/png; mode=8bit'
+    image_format = 'image/png'
     params = {
         'service': 'WMS',
         'version': '1.1.1',
